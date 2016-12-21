@@ -44,33 +44,57 @@ def heuristic(square):
         return total_damage
 
 
+def assign_move(square, force_moves):
+    if len(force_moves) != 0:
+        for m in force_moves:
+            if (square.x, square.y) == (m.square.x, m.square.y):
+                return m
 
-def assign_move(square):
     # Select direction with best production/strength or most damage
+    border = any(neighbor.owner != myID for neighbor in game_map.neighbors(square))
+
     target, direction = max(((neighbor, direction) for direction, neighbor in enumerate(game_map.neighbors(square))
                             if neighbor.owner != myID),
                             default = (None, None),
                             key = lambda t: heuristic(t[0]))
     # Attack if enough strength
-    if (target != None) and (target.strength < square.strength):
+    if (target != None) and (target.strength < square.strength) and border:
+        force_moves.append(Move(square, direction))
         return Move(square, direction)
+    # elif (target != None) and border:
+    #     for d, neighbor in enumerate(game_map.neighbors(square)):
+    #         if neighbor.owner == myID and \
+    #                 (neighbor.strength + square.strength) > target.strength and\
+    #                 neighbor.strength >= 10:
+    #
+    #             forced = any((neighbor.x, neighbor.y) == (m.square.x, m.square.y) for m in force_moves)
+    #             if not forced:
+    #                 force_moves.append(Move(neighbor, hlt.opposite_cardinal(d)) )
+    #                 force_moves.append(Move(square, direction) )
+    #                 return Move(square, direction)
+
 
     # Keep producing if strength still too little
     if square.strength < 10 * square.production and square.strength < 50:
+        force_moves.append(Move(square, STILL))
         return Move(square, STILL)
 
     # If not at border (around by allies) then transport strength to nearest border
-    border = any(neighbor.owner != myID for neighbor in game_map.neighbors(square))
     if (not border):
+        force_moves.append(Move(square, nearest_enemy_direction(square)))
         return Move(square, nearest_enemy_direction(square))
 
     # Wait until stronger than enemy
     else:
+        force_moves.append(Move(square, STILL))
         return Move(square, STILL)
 
 
-
 while True:
+    force_moves = []
     game_map.get_frame()
-    moves = [assign_move(square) for square in game_map if square.owner == myID]
+    moves = [assign_move(square, force_moves) for square in game_map if square.owner == myID]
+
+    # moves += force_moves
     hlt.send_frame(moves)
+    # hlt.send_frame(force_moves)
