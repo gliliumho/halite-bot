@@ -68,7 +68,8 @@ def assign_move(square, force_moves):
         for d, neighbor in enumerate(game_map.neighbors(square)):
             if neighbor.owner == myID and \
                 (neighbor.strength + square.strength) > target.strength and \
-                neighbor.strength >= 5*neighbor.production:
+                neighbor.strength >= 5*neighbor.production and \
+                square.strength > neighbor.strength:
 
                 forced = any((neighbor.x, neighbor.y) == (m.square.x, m.square.y) for m in force_moves)
                 if not forced:
