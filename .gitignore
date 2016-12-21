@@ -1,5 +1,12 @@
 __pycache__
+
+replays
+logs
+node_modules
+
 *.hlt
+*.log
 halite
 .DS_Store
-
+*.js
+*.json
