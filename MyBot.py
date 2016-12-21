@@ -69,15 +69,15 @@ def assign_move(square, force_moves):
     elif (target != None) and production_ready:
         for d, neighbor in enumerate(game_map.neighbors(square)):
             if neighbor.owner == myID and \
-                (neighbor.strength + square.strength) > target.strength and \
+                (neighbor.strength + square.strength + square.production) > target.strength and \
                 neighbor.strength >= 5*neighbor.production and \
                 square.strength > neighbor.strength:
 
                 forced = any((neighbor.x, neighbor.y) == (m.square.x, m.square.y) for m in force_moves)
                 if not forced:
                     force_moves.append(Move(neighbor, hlt.opposite_cardinal(d)) )
-                    force_moves.append(Move(square, direction) )
-                    return Move(square, direction)
+                    force_moves.append(Move(square, STILL) )
+                    return Move(square, STILL)
 
 
     border = any(neighbor.owner != myID for neighbor in game_map.neighbors(square))
